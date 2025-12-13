@@ -1,16 +1,9 @@
 package io.github.suwasto.showcase
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,13 +21,9 @@ import io.github.suwasto.showcasecompose.core.ShowcaseStep
 import io.github.suwasto.showcasecompose.modifier.captureBounds
 import io.github.suwasto.showcasecompose.render.ShowcaseHost
 import io.github.suwasto.showcasecompose.tooltip.Tooltip
+import io.github.suwasto.showcasecompose.tooltip.TooltipBubbleStyle
 import io.github.suwasto.showcasecompose.tooltip.TooltipDirection
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-import showcase.composeapp.generated.resources.Res
-import showcase.composeapp.generated.resources.compose_multiplatform
 
 @Composable
 @Preview
@@ -43,8 +32,7 @@ fun App() {
 
         val showcaseState = remember { ShowcaseState() }
         val showcaseController = remember { ShowcaseController(showcaseState) }
-        var rect1 by remember { mutableStateOf<Rect?>(null) }
-        var rect2 by remember { mutableStateOf<Rect?>(null) }
+        val layouts = remember { mutableStateMapOf<String, Rect>() }
 
         Scaffold {
             ShowcaseHost(
@@ -57,53 +45,61 @@ fun App() {
                             "Show case highlight here!!!",
                             fontSize = 20.sp,
                             modifier = Modifier.captureBounds { rect ->
-                                rect1 = rect
+                                layouts["one"] = rect
                             }.align(Alignment.TopCenter)
                         )
                         Text(
                             "Then here!!!",
                             fontSize = 20.sp,
                             modifier = Modifier.captureBounds { rect ->
-                                rect2 = rect
+                                layouts["two"] = rect
                             }.align(Alignment.Center)
                         )
                     }
 
+                    val steps = listOfNotNull(
+                        layouts["one"]?.let { rect ->
+                            ShowcaseStep(
+                                rect = rect,
+                                shape = ShowcaseShape.Rounded(12.dp)
+                            ) {
+                                Tooltip(
+                                    anchorRect = rect,
+                                    direction = TooltipDirection.Start,
+                                    bubbleStyle = TooltipBubbleStyle(),
+                                    clippingEnable = true
+                                ) {
+                                    Text(
+                                        modifier = Modifier.padding(8.dp),
+                                        text = "Hello showcase one!!!"
+                                    )
+                                }
+                            }
+                        },
+                        layouts["two"]?.let { rect ->
+                            ShowcaseStep(
+                                rect = rect,
+                                shape = ShowcaseShape.Rounded(12.dp)
+                            ) {
+                                Tooltip(
+                                    anchorRect = rect,
+                                    direction = TooltipDirection.Top
+                                ) {
+                                    Text("Hello two!!!")
+                                }
+                            }
+                        }
+                    )
+
                     Button(
                         modifier = Modifier,
                         onClick = {
-                            showcaseController.start(
-                                listOf(
-                                    ShowcaseStep(
-                                        rect = rect1!!,
-                                        shape = ShowcaseShape.Rounded(12.dp)
-                                    ) {
-                                        Tooltip(
-                                            anchorRect = rect1!!,
-                                            direction = TooltipDirection.Bottom
-                                        ) {
-                                            Text("Hello showcase one!!!")
-                                        }
-                                    },
-                                    ShowcaseStep(
-                                        rect = rect2!!,
-                                        shape = ShowcaseShape.Rounded(12.dp)
-                                    ) {
-                                        Tooltip(
-                                            anchorRect = rect2!!,
-                                            direction = TooltipDirection.Top
-                                        ) {
-                                            Text("Hello two!!!")
-                                        }
-                                    }
-                                )
-                            )
+                            showcaseController.start(steps)
                         }
                     ) {
                         Text("START SHOWCASE")
                     }
                 }
-
             }
         }
     }

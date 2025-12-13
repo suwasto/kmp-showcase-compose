@@ -40,7 +40,7 @@ class TooltipBubbleShape(
                     path.lineTo(size.width / 2 + arrow, body.top)
                 }
 
-                TooltipDirection.Left -> {
+                TooltipDirection.Start -> {
                     val body = Rect(0f, 0f, size.width - arrow, size.height)
                     path.addRoundRect(RoundRect(body, radius, radius))
 
@@ -49,7 +49,7 @@ class TooltipBubbleShape(
                     path.lineTo(body.right, size.height / 2 + arrow)
                 }
 
-                TooltipDirection.Right -> {
+                TooltipDirection.End -> {
                     val body = Rect(arrow, 0f, size.width, size.height)
                     path.addRoundRect(RoundRect(body, radius, radius))
 

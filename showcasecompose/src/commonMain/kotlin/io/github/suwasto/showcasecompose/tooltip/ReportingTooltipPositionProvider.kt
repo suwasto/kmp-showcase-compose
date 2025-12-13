@@ -40,13 +40,13 @@ class ReportingTooltipPositionProvider(
                     y = (anchor.bottom + marginPx).toInt()
                 )
 
-            TooltipDirection.Left ->
+            TooltipDirection.Start ->
                 IntOffset(
                     x = (anchor.left - popupContentSize.width - marginPx).toInt(),
                     y = (anchor.center.y - popupContentSize.height / 2).toInt()
                 )
 
-            TooltipDirection.Right ->
+            TooltipDirection.End ->
                 IntOffset(
                     x = (anchor.right + marginPx).toInt(),
                     y = (anchor.center.y - popupContentSize.height / 2).toInt()
