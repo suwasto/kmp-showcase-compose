@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.projects
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -39,6 +40,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(projects.showcasecompose)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

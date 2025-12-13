@@ -5,7 +5,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.dp
 
 data class ShowcaseStep(
-    val rect: Rect,                        // rectangle of target view
-    val shape: ShowcaseShape = ShowcaseShape.Rounded(12.dp),
+    val rect: Rect,
+    val shape: ShowcaseShape = ShowcaseShape.Rect,
     val content: @Composable () -> Unit
 )

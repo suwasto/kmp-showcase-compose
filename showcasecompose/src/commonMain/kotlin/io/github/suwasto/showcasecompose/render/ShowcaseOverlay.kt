@@ -22,7 +22,7 @@ import io.github.suwasto.showcasecompose.core.ShowcaseState
 import kotlin.math.max
 
 @Composable
-fun ShowcaseOverlay(
+internal fun ShowcaseOverlay(
     state: ShowcaseState,
     dimColor: Color = Color.Black.copy(alpha = 0.7f)
 ) {
