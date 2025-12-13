@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -108,6 +109,7 @@ fun ShowcaseOverlay(
                 }
             }
     ) {}
-    step.content()
-
+    Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
+        step.content()
+    }
 }
