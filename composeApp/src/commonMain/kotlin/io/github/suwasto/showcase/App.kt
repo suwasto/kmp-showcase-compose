@@ -1,5 +1,6 @@
 package io.github.suwasto.showcase
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,8 +35,8 @@ fun App() {
         val steps by remember {
             derivedStateOf {
                 listOfNotNull(
-                    layouts["one"]?.let { getShowcaseOne(it) },
-                    layouts["two"]?.let { getShowcaseTwo(it) }
+                    layouts["two"]?.let { getShowcaseTwo(it) },
+                    layouts["one"]?.let { getShowcaseOne(it) }
                 )
             }
         }
@@ -44,7 +45,7 @@ fun App() {
             ShowcaseHost(
                 controller = showcaseController,
                 modifier = Modifier.padding(it),
-                enableNextOnOverlayClick = true
+                enableNextOnOverlayClick = false
             ) {
                 Column {
                     Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
@@ -61,6 +62,9 @@ fun App() {
                             modifier = Modifier.captureBounds { rect ->
                                 layouts["two"] = rect
                             }.align(Alignment.Center)
+                                .clickable {
+
+                                }
                         )
                     }
 
