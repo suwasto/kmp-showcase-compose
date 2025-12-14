@@ -14,10 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.suwasto.showcasecompose.core.ShowcaseController
 import io.github.suwasto.showcasecompose.core.ShowcaseShape
-import io.github.suwasto.showcasecompose.core.ShowcaseState
 import io.github.suwasto.showcasecompose.core.ShowcaseStep
+import io.github.suwasto.showcasecompose.core.rememberShowcaseController
 import io.github.suwasto.showcasecompose.modifier.captureBounds
 import io.github.suwasto.showcasecompose.render.ShowcaseHost
 import io.github.suwasto.showcasecompose.tooltip.Tooltip
@@ -30,14 +29,22 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun App() {
     MaterialTheme {
 
-        val showcaseState = remember { ShowcaseState() }
-        val showcaseController = remember { ShowcaseController(showcaseState) }
+        val showcaseController = rememberShowcaseController()
         val layouts = remember { mutableStateMapOf<String, Rect>() }
+        val steps by remember {
+            derivedStateOf {
+                listOfNotNull(
+                    layouts["one"]?.let { getShowcaseOne(it) },
+                    layouts["two"]?.let { getShowcaseTwo(it) }
+                )
+            }
+        }
 
         Scaffold {
             ShowcaseHost(
                 controller = showcaseController,
-                modifier = Modifier.padding(it)
+                modifier = Modifier.padding(it),
+                enableNextOnOverlayClick = true
             ) {
                 Column {
                     Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
@@ -57,40 +64,6 @@ fun App() {
                         )
                     }
 
-                    val steps = listOfNotNull(
-                        layouts["one"]?.let { rect ->
-                            ShowcaseStep(
-                                rect = rect,
-                                shape = ShowcaseShape.Rounded(12.dp)
-                            ) {
-                                Tooltip(
-                                    anchorRect = rect,
-                                    direction = TooltipDirection.Start,
-                                    bubbleStyle = TooltipBubbleStyle(),
-                                    clippingEnable = true
-                                ) {
-                                    Text(
-                                        modifier = Modifier.padding(8.dp),
-                                        text = "Hello showcase one!!!"
-                                    )
-                                }
-                            }
-                        },
-                        layouts["two"]?.let { rect ->
-                            ShowcaseStep(
-                                rect = rect,
-                                shape = ShowcaseShape.Rounded(12.dp)
-                            ) {
-                                Tooltip(
-                                    anchorRect = rect,
-                                    direction = TooltipDirection.Top
-                                ) {
-                                    Text("Hello two!!!")
-                                }
-                            }
-                        }
-                    )
-
                     Button(
                         modifier = Modifier,
                         onClick = {
@@ -101,6 +74,37 @@ fun App() {
                     }
                 }
             }
+        }
+    }
+}
+
+private fun getShowcaseOne(rect: Rect) = ShowcaseStep(
+    rect = rect,
+) {
+    Tooltip(
+        anchorRect = rect,
+        direction = TooltipDirection.Bottom,
+        bubbleStyle = TooltipBubbleStyle(),
+        clippingEnable = true
+    ) {
+        Text(
+            modifier = Modifier.padding(8.dp),
+            text = "Hello showcase one!!!"
+        )
+    }
+}
+
+private fun getShowcaseTwo(rect: Rect) = ShowcaseStep(
+    rect = rect,
+    shape = ShowcaseShape.Rounded(12.dp),
+    highlightPadding = 12.dp
+) { highlightRect ->
+    Tooltip(
+        anchorRect = highlightRect,
+        direction = TooltipDirection.End
+    ) {
+        Box(modifier = Modifier.padding(12.dp)) {
+            Text("Hello two!!!")
         }
     }
 }

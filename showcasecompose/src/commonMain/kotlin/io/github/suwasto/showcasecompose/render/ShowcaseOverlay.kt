@@ -19,18 +19,24 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import io.github.suwasto.showcasecompose.core.ShowcaseShape
 import io.github.suwasto.showcasecompose.core.ShowcaseState
+import io.github.suwasto.showcasecompose.core.inflate
 import kotlin.math.max
 
 @Composable
 internal fun ShowcaseOverlay(
     state: ShowcaseState,
-    dimColor: Color = Color.Black.copy(alpha = 0.7f)
+    dimColor: Color = Color.Black.copy(alpha = 0.7f),
+    enableNextOnOverlayClick: Boolean
 ) {
     if (!state.isActive) return
 
     val step = state.steps[state.currentIndex]
-    val rect = step.rect
     val density = LocalDensity.current
+
+    val paddingPx = with(density) { step.highlightPadding.toPx() }
+    val rect = step.rect.inflate(paddingPx)
+
+
     val statusBarHeightPx = with(LocalDensity.current) {
         WindowInsets.statusBars.getTop(this).toFloat()
     }
@@ -39,8 +45,12 @@ internal fun ShowcaseOverlay(
     Box(
         Modifier
             .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures { state.next() }   // tap to go next
+            .pointerInput(enableNextOnOverlayClick) {
+                detectTapGestures {
+                    if (enableNextOnOverlayClick) {
+                        state.next()
+                    }
+                }
             }
             .drawWithContent {
                 drawContent()
@@ -110,6 +120,6 @@ internal fun ShowcaseOverlay(
             }
     ) {}
     Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
-        step.content()
+        step.content(rect)
     }
 }

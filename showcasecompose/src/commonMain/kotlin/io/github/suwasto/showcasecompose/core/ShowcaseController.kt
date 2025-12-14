@@ -1,5 +1,8 @@
 package io.github.suwasto.showcasecompose.core
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+
 class ShowcaseController(val state: ShowcaseState) {
 
     /** Build a list of steps and start showcase */
@@ -22,4 +25,10 @@ class ShowcaseController(val state: ShowcaseState) {
     /** Whether showcase is running */
     val isRunning: Boolean
         get() = state.isActive
+}
+
+@Composable
+fun rememberShowcaseController(): ShowcaseController {
+    val state = remember { ShowcaseState() }
+    return remember(state) { ShowcaseController(state) }
 }
