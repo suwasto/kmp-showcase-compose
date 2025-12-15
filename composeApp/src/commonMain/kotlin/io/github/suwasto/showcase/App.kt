@@ -20,6 +20,7 @@ import io.github.suwasto.showcasecompose.core.ShowcaseStep
 import io.github.suwasto.showcasecompose.core.rememberShowcaseController
 import io.github.suwasto.showcasecompose.modifier.captureBounds
 import io.github.suwasto.showcasecompose.render.ShowcaseHost
+import io.github.suwasto.showcasecompose.render.ShowcaseStyle
 import io.github.suwasto.showcasecompose.tooltip.Tooltip
 import io.github.suwasto.showcasecompose.tooltip.TooltipBubbleStyle
 import io.github.suwasto.showcasecompose.tooltip.TooltipDirection
@@ -44,8 +45,7 @@ fun App() {
         Scaffold {
             ShowcaseHost(
                 controller = showcaseController,
-                modifier = Modifier.padding(it),
-                enableNextOnOverlayClick = false
+                modifier = Modifier.padding(it)
             ) {
                 Column {
                     Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
@@ -63,7 +63,7 @@ fun App() {
                                 layouts["two"] = rect
                             }.align(Alignment.Center)
                                 .clickable {
-
+                                    showcaseController.next()
                                 }
                         )
                     }
@@ -100,7 +100,7 @@ private fun getShowcaseOne(rect: Rect) = ShowcaseStep(
 
 private fun getShowcaseTwo(rect: Rect) = ShowcaseStep(
     rect = rect,
-    shape = ShowcaseShape.Rounded(12.dp),
+    style = ShowcaseStyle.Standard(ShowcaseShape.Rounded(12.dp)),
     highlightPadding = 12.dp
 ) { highlightRect ->
     Tooltip(

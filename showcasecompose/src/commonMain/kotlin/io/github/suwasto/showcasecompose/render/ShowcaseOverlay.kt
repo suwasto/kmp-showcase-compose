@@ -7,14 +7,12 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -25,18 +23,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.suwasto.showcasecompose.core.ShowcaseShape
 import io.github.suwasto.showcasecompose.core.ShowcaseState
-import io.github.suwasto.showcasecompose.core.inflate
 import kotlin.math.max
 
 sealed interface ShowcaseStyle {
-    object Standard : ShowcaseStyle
+    data class Standard(val shape: ShowcaseShape = ShowcaseShape.Rect) : ShowcaseStyle
 
     data class WaterDropRipple(
         val color: Color = Color.Cyan,
@@ -58,7 +54,6 @@ sealed interface ShowcaseStyle {
 internal fun ShowcaseOverlay(
     state: ShowcaseState,
     dimColor: Color = Color.Black.copy(alpha = 0.7f),
-    enableNextOnOverlayClick: Boolean,
     showcaseStyle: ShowcaseStyle = ShowcaseStyle.PulsingCircle()
 ) {
     if (!state.isActive) return
@@ -104,22 +99,10 @@ internal fun ShowcaseOverlay(
         ).value
     } else 1f
 
+
     Box(
         Modifier
             .fillMaxSize()
-            .then(
-                if (enableNextOnOverlayClick) {
-                    Modifier.pointerInput(enableNextOnOverlayClick) {
-                        detectTapGestures {
-                            if (enableNextOnOverlayClick) {
-                                state.next()
-                            }
-                        }
-                    }
-                } else {
-                    Modifier
-                }
-            )
             .drawWithContent {
                 drawContent()
 
@@ -150,7 +133,7 @@ internal fun ShowcaseOverlay(
 
                     when (showcaseStyle) {
                         is ShowcaseStyle.Standard -> {
-                            drawCutout(canvas, step.shape, rect, clearPaint, density)
+                            drawCutout(canvas, showcaseStyle.shape, rect, clearPaint, density)
                         }
 
                         is ShowcaseStyle.WaterDropRipple -> {
