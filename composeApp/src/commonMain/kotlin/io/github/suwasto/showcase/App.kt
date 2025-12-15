@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.suwasto.showcasecompose.core.ShowcaseController
 import io.github.suwasto.showcasecompose.core.ShowcaseShape
 import io.github.suwasto.showcasecompose.core.ShowcaseStep
 import io.github.suwasto.showcasecompose.core.rememberShowcaseController
@@ -36,7 +37,7 @@ fun App() {
         val steps by remember {
             derivedStateOf {
                 listOfNotNull(
-                    layouts["two"]?.let { getShowcaseTwo(it) },
+                    layouts["two"]?.let { getShowcaseTwo(showcaseController,it) },
                     layouts["one"]?.let { getShowcaseOne(it) }
                 )
             }
@@ -62,9 +63,6 @@ fun App() {
                             modifier = Modifier.captureBounds { rect ->
                                 layouts["two"] = rect
                             }.align(Alignment.Center)
-                                .clickable {
-                                    showcaseController.next()
-                                }
                         )
                     }
 
@@ -98,10 +96,13 @@ private fun getShowcaseOne(rect: Rect) = ShowcaseStep(
     }
 }
 
-private fun getShowcaseTwo(rect: Rect) = ShowcaseStep(
+private fun getShowcaseTwo(showcaseController: ShowcaseController, rect: Rect) = ShowcaseStep(
     rect = rect,
     style = ShowcaseStyle.Standard(ShowcaseShape.Rounded(12.dp)),
-    highlightPadding = 12.dp
+    highlightPadding = 12.dp,
+    onClickHighlight = {
+        showcaseController.next()
+    }
 ) { highlightRect ->
     Tooltip(
         anchorRect = highlightRect,

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -32,7 +34,7 @@ import io.github.suwasto.showcasecompose.core.ShowcaseState
 import kotlin.math.max
 
 sealed interface ShowcaseStyle {
-    data class Standard(val shape: ShowcaseShape = ShowcaseShape.Rect) : ShowcaseStyle
+    data class Standard(val shape: ShowcaseShape) : ShowcaseStyle
 
     data class WaterDropRipple(
         val color: Color = Color.Cyan,
@@ -53,8 +55,7 @@ sealed interface ShowcaseStyle {
 @Composable
 internal fun ShowcaseOverlay(
     state: ShowcaseState,
-    dimColor: Color = Color.Black.copy(alpha = 0.7f),
-    showcaseStyle: ShowcaseStyle = ShowcaseStyle.PulsingCircle()
+    dimColor: Color = Color.Black.copy(alpha = 0.7f)
 ) {
     if (!state.isActive) return
 
@@ -69,14 +70,14 @@ internal fun ShowcaseOverlay(
         WindowInsets.statusBars.getTop(this).toFloat()
     }
 
-    val rippleProgress = if (showcaseStyle is ShowcaseStyle.WaterDropRipple) {
+    val rippleProgress = if (step.style is ShowcaseStyle.WaterDropRipple) {
         val transition = rememberInfiniteTransition()
         transition.animateFloat(
             initialValue = 0f,
             targetValue = 1f,
             animationSpec = infiniteRepeatable(
                 animation = tween(
-                    durationMillis = showcaseStyle.durationMillis,
+                    durationMillis = step.style.durationMillis,
                     easing = LinearEasing
                 ),
                 repeatMode = RepeatMode.Restart
@@ -84,14 +85,14 @@ internal fun ShowcaseOverlay(
         ).value
     } else 0f
 
-    val pulseProgress = if (showcaseStyle is ShowcaseStyle.PulsingCircle) {
+    val pulseProgress = if (step.style is ShowcaseStyle.PulsingCircle) {
         val transition = rememberInfiniteTransition()
         transition.animateFloat(
             initialValue = 0.7f,
             targetValue = 1.3f,
             animationSpec = infiniteRepeatable(
                 animation = tween(
-                    durationMillis = showcaseStyle.durationMillis,
+                    durationMillis = step.style.durationMillis,
                     easing = FastOutSlowInEasing
                 ),
                 repeatMode = RepeatMode.Reverse
@@ -99,10 +100,16 @@ internal fun ShowcaseOverlay(
         ).value
     } else 1f
 
-
     Box(
         Modifier
             .fillMaxSize()
+            .pointerInput(state.currentIndex) {
+                detectTapGestures { tapOffset ->
+                    if (rect.contains(tapOffset)) {
+                        step.onClickHighlight()
+                    }
+                }
+            }
             .drawWithContent {
                 drawContent()
 
@@ -131,16 +138,16 @@ internal fun ShowcaseOverlay(
                         size = size
                     )
 
-                    when (showcaseStyle) {
+                    when (step.style) {
                         is ShowcaseStyle.Standard -> {
-                            drawCutout(canvas, showcaseStyle.shape, rect, clearPaint, density)
+                            drawCutout(canvas, step.style.shape, rect, clearPaint, density)
                         }
 
                         is ShowcaseStyle.WaterDropRipple -> {
-                            val maxRadiusPx = with(density) { showcaseStyle.maxRadius.toPx() }
-                            val strokeWidthPx = with(density) { showcaseStyle.strokeWidth.toPx() }
+                            val maxRadiusPx = with(density) { step.style.maxRadius.toPx() }
+                            val strokeWidthPx = with(density) { step.style.strokeWidth.toPx() }
 
-                            repeat(showcaseStyle.rippleCount) { i ->
+                            repeat(step.style.rippleCount) { i ->
                                 val progressOffset = (rippleProgress + i * 0.3f) % 1f
                                 val radius =
                                     max(rect.width, rect.height) / 2f + progressOffset * maxRadiusPx
@@ -150,7 +157,7 @@ internal fun ShowcaseOverlay(
                                     center = center,
                                     radius = radius,
                                     paint = Paint().apply {
-                                        color = showcaseStyle.color.copy(alpha = alpha)
+                                        color = step.style.color.copy(alpha = alpha)
                                         style = PaintingStyle.Stroke
                                         this.strokeWidth = strokeWidthPx
                                     }
@@ -161,8 +168,8 @@ internal fun ShowcaseOverlay(
 
                         is ShowcaseStyle.PulsingCircle -> {
                             val baseRadius = max(rect.width, rect.height) / 2f
-                            val maxRadiusPx = with(density) { showcaseStyle.maxRadius.toPx() }
-                            val strokeWidthPx = with(density) { showcaseStyle.strokeWidth.toPx() }
+                            val maxRadiusPx = with(density) { step.style.maxRadius.toPx() }
+                            val strokeWidthPx = with(density) { step.style.strokeWidth.toPx() }
 
                             val radius = baseRadius + pulseProgress * maxRadiusPx
 
@@ -170,7 +177,7 @@ internal fun ShowcaseOverlay(
                                 center = center,
                                 radius = radius,
                                 paint = Paint().apply {
-                                    color = showcaseStyle.color.copy(alpha = 0.3f)
+                                    color = step.style.color.copy(alpha = 0.3f)
                                     style = PaintingStyle.Stroke
                                     strokeWidth = strokeWidthPx
                                 }

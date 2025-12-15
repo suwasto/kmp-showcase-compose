@@ -23,29 +23,4 @@ fun ShowcaseHost(
         state = controller.state
     )
 
-    if (controller.state.isActive) {
-        val step = controller.state.steps[controller.state.currentIndex]
-        val density = LocalDensity.current
-
-        val paddingPx = with(density) { step.highlightPadding.toPx() }
-        val rect = step.rect.inflate(paddingPx)
-        Box(
-            Modifier
-                .fillMaxSize()
-                .pointerInput(rect) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull() ?: continue
-                            val pos = change.position
-                            if (!rect.contains(pos)) {
-                                // Consume only outside the highlighted rect
-                                change.consume()
-                            }
-                        }
-                    }
-                }
-        )
-    }
-
 }

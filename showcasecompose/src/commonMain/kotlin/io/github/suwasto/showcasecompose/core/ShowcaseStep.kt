@@ -8,7 +8,10 @@ import io.github.suwasto.showcasecompose.render.ShowcaseStyle
 
 data class ShowcaseStep(
     val rect: Rect,
-    val style: ShowcaseStyle = ShowcaseStyle.Standard(),
+    val style: ShowcaseStyle = ShowcaseStyle.Standard(
+        shape = ShowcaseShape.Rect
+    ),
     val highlightPadding: Dp = 0.dp,
+    val onClickHighlight: () -> Unit = {},
     val content: @Composable (highlightRect: Rect) -> Unit
 )
