@@ -1,9 +1,11 @@
 package io.github.suwasto.showcasecompose.render
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -14,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -23,6 +27,7 @@ import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -31,6 +36,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.suwasto.showcasecompose.core.ShowcaseShape
 import io.github.suwasto.showcasecompose.core.ShowcaseState
+import kotlinx.coroutines.delay
 import kotlin.math.max
 
 sealed interface ShowcaseStyle {
@@ -65,9 +71,20 @@ internal fun ShowcaseOverlay(
     val paddingPx = with(density) { step.highlightPadding.toPx() }
     val rect = step.rect.inflate(paddingPx)
 
-
     val statusBarHeightPx = with(LocalDensity.current) {
         WindowInsets.statusBars.getTop(this).toFloat()
+    }
+
+    val animatable = remember { Animatable(0f) }
+
+    LaunchedEffect(step.enableDimAnim) {
+        if (step.enableDimAnim) {
+            animatable.snapTo(0f)
+            delay(16)
+            animatable.animateTo(1f, tween(step.dimAnimationDurationMillis, easing = FastOutSlowInEasing))
+        } else {
+            animatable.snapTo(1f)
+        }
     }
 
     val rippleProgress = if (step.style is ShowcaseStyle.WaterDropRipple) {
@@ -133,10 +150,31 @@ internal fun ShowcaseOverlay(
                         size.width,
                         size.height
                     )
-                    drawRect(
-                        color = dimColor,
-                        size = size
-                    )
+
+                    val maxRadius = listOf(
+                        Offset(0f, 0f),
+                        Offset(size.width, 0f),
+                        Offset(0f, size.height),
+                        Offset(size.width, size.height)
+                    ).maxOf { (it - center).getDistance() }
+
+                    if (step.enableDimAnim && animatable.value < 1f) {
+                        val currentRadius = maxRadius * animatable.value
+                        canvas.drawCircle(
+                            center = center,
+                            radius = currentRadius,
+                            paint = Paint().apply {
+                                color = dimColor
+                                style = PaintingStyle.Fill
+                            }
+                        )
+                    } else {
+                        // Full dim overlay if animation disabled
+                        drawRect(
+                            color = dimColor,
+                            size = size
+                        )
+                    }
 
                     when (step.style) {
                         is ShowcaseStyle.Standard -> {

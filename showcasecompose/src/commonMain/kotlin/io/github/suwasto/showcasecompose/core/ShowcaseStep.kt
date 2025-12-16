@@ -13,5 +13,7 @@ data class ShowcaseStep(
     ),
     val highlightPadding: Dp = 0.dp,
     val onClickHighlight: () -> Unit = {},
+    val enableDimAnim: Boolean = true,
+    val dimAnimationDurationMillis: Int = 800,
     val content: @Composable (highlightRect: Rect) -> Unit
 )

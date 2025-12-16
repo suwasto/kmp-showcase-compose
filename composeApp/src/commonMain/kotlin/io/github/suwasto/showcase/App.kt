@@ -101,8 +101,10 @@ private fun getShowcaseTwo(showcaseController: ShowcaseController, rect: Rect) =
     style = ShowcaseStyle.Standard(ShowcaseShape.Rounded(12.dp)),
     highlightPadding = 12.dp,
     onClickHighlight = {
-        showcaseController.next()
-    }
+        showcaseController.finish()
+    },
+    enableDimAnim = true,
+    dimAnimationDurationMillis = 800
 ) { highlightRect ->
     Tooltip(
         anchorRect = highlightRect,
