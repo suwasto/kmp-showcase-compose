@@ -159,17 +159,18 @@ internal fun ShowcaseOverlay(
                     ).maxOf { (it - center).getDistance() }
 
                     if (step.enableDimAnim && animatable.value < 1f) {
-                        val currentRadius = maxRadius * animatable.value
+                        canvas.translate(center.x, center.y)
+                        canvas.scale(animatable.value, animatable.value)
+                        canvas.translate(-center.x, -center.y)
                         canvas.drawCircle(
                             center = center,
-                            radius = currentRadius,
+                            radius = maxRadius,
                             paint = Paint().apply {
                                 color = dimColor
                                 style = PaintingStyle.Fill
                             }
                         )
                     } else {
-                        // Full dim overlay if animation disabled
                         drawRect(
                             color = dimColor,
                             size = size
