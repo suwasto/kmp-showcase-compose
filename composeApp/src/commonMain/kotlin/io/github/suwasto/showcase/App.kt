@@ -118,7 +118,7 @@ private fun getShowcaseTwo(showcaseController: ShowcaseController, rect: Rect) =
     Tooltip(
         anchorRect = highlightRect,
         direction = TooltipDirection.Bottom,
-        bubbleStyle = TooltipBubbleStyle(arrowAlignment = ArrowAlignment.Center, cornerRadius = 50.dp)
+        bubbleStyle = TooltipBubbleStyle(arrowAlignment = ArrowAlignment.Start)
     ) {
         Box(modifier = Modifier.padding(12.dp)) {
             Text("Hello two!!!")
