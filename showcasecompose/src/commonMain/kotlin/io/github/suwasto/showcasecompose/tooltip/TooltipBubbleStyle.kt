@@ -7,6 +7,5 @@ import androidx.compose.ui.unit.dp
 data class TooltipBubbleStyle(
     val backgroundColor: Color = Color(0xFFFFFFFF),
     val cornerRadius: Dp = 8.dp,
-    val arrowSize: Dp = 8.dp,
-    val arrowAlignment: ArrowAlignment = ArrowAlignment.Center
+    val arrowSize: Dp = 8.dp
 )

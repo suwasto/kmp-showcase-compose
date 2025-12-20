@@ -8,13 +8,12 @@ class ReportingTooltipPositionProvider(
     private val anchor: Rect,
     private val direction: TooltipDirection,
     private val marginPx: Int,
-    private val arrowAlignment: ArrowAlignment,
-    private val arrowSizePx: Int,
-    private val onPositionResolved: () -> Unit
+    private val onArrowCenterResolved: (Float) -> Unit,
+    private val onPositionResolved: () -> Unit = {}
 ) : PopupPositionProvider {
 
-    private var lastContentSize: IntSize? = null
     private var resolved = false
+    private var lastContentSize: IntSize? = null
 
     override fun calculatePosition(
         anchorBounds: IntRect,
@@ -23,66 +22,55 @@ class ReportingTooltipPositionProvider(
         popupContentSize: IntSize
     ): IntOffset {
 
-        if (!resolved && popupContentSize != lastContentSize) {
-            lastContentSize = popupContentSize
-            resolved = true
-            onPositionResolved()
-        }
-
-        val horizontalShift =
-            if (direction == TooltipDirection.Top || direction == TooltipDirection.Bottom) {
-                bubbleShift(
-                    alignment = arrowAlignment,
-                    bubbleSize = popupContentSize.width,
-                    arrowSizePx = arrowSizePx
-                )
-            } else 0
-
-        val verticalShift =
-            if (direction == TooltipDirection.Start || direction == TooltipDirection.End) {
-                bubbleShift(
-                    alignment = arrowAlignment,
-                    bubbleSize = popupContentSize.height,
-                    arrowSizePx = arrowSizePx
-                )
-            } else 0
-
-
-        return when (direction) {
+        // Compute the raw bubble offset
+        val offset = when (direction) {
             TooltipDirection.Top ->
                 IntOffset(
-                    x = (anchor.center.x - popupContentSize.width / 2).toInt() + horizontalShift,
+                    x = (anchor.center.x - popupContentSize.width / 2).toInt(),
                     y = (anchor.top - popupContentSize.height - marginPx).toInt()
                 )
 
             TooltipDirection.Bottom ->
                 IntOffset(
-                    x = (anchor.center.x - popupContentSize.width / 2).toInt() + horizontalShift,
+                    x = (anchor.center.x - popupContentSize.width / 2).toInt(),
                     y = (anchor.bottom + marginPx).toInt()
                 )
 
             TooltipDirection.Start ->
                 IntOffset(
                     x = (anchor.left - popupContentSize.width - marginPx).toInt(),
-                    y = (anchor.center.y - popupContentSize.height / 2).toInt() + verticalShift
+                    y = (anchor.center.y - popupContentSize.height / 2).toInt()
                 )
 
             TooltipDirection.End ->
                 IntOffset(
                     x = (anchor.right + marginPx).toInt(),
-                    y = (anchor.center.y - popupContentSize.height / 2).toInt() + verticalShift
+                    y = (anchor.center.y - popupContentSize.height / 2).toInt()
                 )
         }
-    }
 
-    private fun bubbleShift(
-        alignment: ArrowAlignment,
-        bubbleSize: Int,
-        arrowSizePx: Int
-    ): Int = when (alignment) {
-        ArrowAlignment.Center -> 0
-        ArrowAlignment.Start -> (bubbleSize / 2 - arrowSizePx)
-        ArrowAlignment.End -> -(bubbleSize / 2 - arrowSizePx)
-    }
+        // Clamp bubble inside the window if needed
+        val clampedX = offset.x.coerceIn(0, windowSize.width - popupContentSize.width)
+        val clampedY = offset.y.coerceIn(0, windowSize.height - popupContentSize.height)
+        val finalOffset = IntOffset(clampedX, clampedY)
 
+        // Compute arrow center relative to bubble
+        val arrowCenter = when (direction) {
+            TooltipDirection.Top, TooltipDirection.Bottom ->
+                (anchor.center.x - finalOffset.x).coerceIn(0f, popupContentSize.width.toFloat())
+            TooltipDirection.Start, TooltipDirection.End ->
+                (anchor.center.y - finalOffset.y).coerceIn(0f, popupContentSize.height.toFloat())
+        }
+
+        onArrowCenterResolved(arrowCenter)
+
+        // Trigger resolved only when size changes
+        if (!resolved || lastContentSize != popupContentSize) {
+            lastContentSize = popupContentSize
+            resolved = true
+            onPositionResolved()
+        }
+
+        return finalOffset
+    }
 }

@@ -15,6 +15,7 @@ kotlin = "2.2.21"
 kotlinStdlib = "2.2.21"
 runner = "1.7.0"
 core = "1.7.0"
+napier = "2.7.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -30,6 +31,7 @@ androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinStdlib" }
 androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
 androidx-core = { group = "androidx.test", name = "core", version.ref = "core" }
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

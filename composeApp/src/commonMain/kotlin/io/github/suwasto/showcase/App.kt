@@ -1,15 +1,20 @@
 package io.github.suwasto.showcase
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -22,7 +27,6 @@ import io.github.suwasto.showcasecompose.core.rememberShowcaseController
 import io.github.suwasto.showcasecompose.modifier.captureBounds
 import io.github.suwasto.showcasecompose.render.ShowcaseHost
 import io.github.suwasto.showcasecompose.render.ShowcaseStyle
-import io.github.suwasto.showcasecompose.tooltip.ArrowAlignment
 import io.github.suwasto.showcasecompose.tooltip.Tooltip
 import io.github.suwasto.showcasecompose.tooltip.TooltipBubbleStyle
 import io.github.suwasto.showcasecompose.tooltip.TooltipDirection
@@ -67,7 +71,7 @@ fun App() {
                             fontSize = 20.sp,
                             modifier = Modifier.captureBounds { rect ->
                                 layouts["two"] = rect
-                            }.align(Alignment.Center)
+                            }.align(Alignment.CenterEnd)
                         )
                     }
 
@@ -117,10 +121,10 @@ private fun getShowcaseTwo(showcaseController: ShowcaseController, rect: Rect) =
 ) { highlightRect ->
     Tooltip(
         anchorRect = highlightRect,
-        direction = TooltipDirection.Bottom,
-        bubbleStyle = TooltipBubbleStyle(arrowAlignment = ArrowAlignment.Start)
+        direction = TooltipDirection.Top,
+        clippingEnable = true,
     ) {
-        Box(modifier = Modifier.padding(12.dp)) {
+        Box(modifier = Modifier.width(300.dp).padding(12.dp)) {
             Text("Hello two!!!")
         }
     }
