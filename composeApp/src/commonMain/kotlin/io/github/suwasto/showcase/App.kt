@@ -22,6 +22,7 @@ import io.github.suwasto.showcasecompose.core.rememberShowcaseController
 import io.github.suwasto.showcasecompose.modifier.captureBounds
 import io.github.suwasto.showcasecompose.render.ShowcaseHost
 import io.github.suwasto.showcasecompose.render.ShowcaseStyle
+import io.github.suwasto.showcasecompose.tooltip.ArrowAlignment
 import io.github.suwasto.showcasecompose.tooltip.Tooltip
 import io.github.suwasto.showcasecompose.tooltip.TooltipBubbleStyle
 import io.github.suwasto.showcasecompose.tooltip.TooltipDirection
@@ -37,8 +38,12 @@ fun App() {
         val steps by remember {
             derivedStateOf {
                 listOfNotNull(
-                    layouts["two"]?.let { getShowcaseTwo(showcaseController,it) },
-                    layouts["one"]?.let { getShowcaseOne(it) }
+                    layouts["two"]?.let { getShowcaseTwo(showcaseController, it) },
+                    layouts["one"]?.let {
+                        getShowcaseOne(it, onClick = {
+                            showcaseController.next()
+                        })
+                    }
                 )
             }
         }
@@ -80,8 +85,12 @@ fun App() {
     }
 }
 
-private fun getShowcaseOne(rect: Rect) = ShowcaseStep(
+private fun getShowcaseOne(
+    rect: Rect,
+    onClick: () -> Unit = {}
+) = ShowcaseStep(
     rect = rect,
+    onClickHighlight = onClick
 ) {
     Tooltip(
         anchorRect = rect,
@@ -101,14 +110,15 @@ private fun getShowcaseTwo(showcaseController: ShowcaseController, rect: Rect) =
     style = ShowcaseStyle.Standard(ShowcaseShape.Rounded(12.dp)),
     highlightPadding = 12.dp,
     onClickHighlight = {
-        showcaseController.finish()
+        showcaseController.next()
     },
     enableDimAnim = true,
     dimAnimationDurationMillis = 800
 ) { highlightRect ->
     Tooltip(
         anchorRect = highlightRect,
-        direction = TooltipDirection.End
+        direction = TooltipDirection.Bottom,
+        bubbleStyle = TooltipBubbleStyle(arrowAlignment = ArrowAlignment.Center, cornerRadius = 50.dp)
     ) {
         Box(modifier = Modifier.padding(12.dp)) {
             Text("Hello two!!!")

@@ -8,4 +8,5 @@ data class TooltipBubbleStyle(
     val backgroundColor: Color = Color(0xFFFFFFFF),
     val cornerRadius: Dp = 8.dp,
     val arrowSize: Dp = 8.dp,
+    val arrowAlignment: ArrowAlignment = ArrowAlignment.Center
 )

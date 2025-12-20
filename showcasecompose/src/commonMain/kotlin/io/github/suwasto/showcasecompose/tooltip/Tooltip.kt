@@ -31,6 +31,9 @@ fun Tooltip(
     val marginPx = with(density) { 8.dp.roundToPx() }
 
     var positionReady by remember { mutableStateOf(false) }
+    val arrowSize = with(density) {
+        bubbleStyle.arrowSize.toPx()
+    }
 
     val scale by animateFloatAsState(
         targetValue = if (positionReady) 1f else 0.8f,
@@ -52,6 +55,8 @@ fun Tooltip(
             anchor = anchorRect,
             direction = direction,
             marginPx = marginPx,
+            arrowAlignment = bubbleStyle.arrowAlignment,
+            arrowSizePx = arrowSize.toInt(),
             onPositionResolved = {
                 positionReady = true
             }

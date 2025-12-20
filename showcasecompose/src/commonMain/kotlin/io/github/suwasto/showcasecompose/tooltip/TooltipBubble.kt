@@ -19,7 +19,8 @@ fun TooltipBubble(
                 TooltipBubbleShape(
                     direction = direction,
                     cornerRadius = style.cornerRadius,
-                    arrowSize = style.arrowSize
+                    arrowSize = style.arrowSize,
+                    arrowAlignment = style.arrowAlignment
                 )
             )
             .background(style.backgroundColor)
