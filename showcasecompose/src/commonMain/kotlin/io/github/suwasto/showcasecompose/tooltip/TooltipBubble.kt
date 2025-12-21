@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 
 @Composable
-fun TooltipBubble(
+internal fun TooltipBubble(
     direction: TooltipDirection,
     arrowCenter: Float,
     style: TooltipBubbleStyle = TooltipBubbleStyle(),

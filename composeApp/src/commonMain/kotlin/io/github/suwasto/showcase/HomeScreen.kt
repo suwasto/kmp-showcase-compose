@@ -1,7 +1,9 @@
 package io.github.suwasto.showcase
 
+import androidx.compose.foundation.BasicTooltipBox
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -39,7 +42,6 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,18 +49,27 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.TooltipState
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -66,6 +77,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.suwasto.showcasecompose.core.ShowcaseController
+import io.github.suwasto.showcasecompose.core.ShowcaseShape
+import io.github.suwasto.showcasecompose.core.ShowcaseStep
+import io.github.suwasto.showcasecompose.core.rememberShowcaseController
+import io.github.suwasto.showcasecompose.modifier.captureBounds
+import io.github.suwasto.showcasecompose.render.ShowcaseHost
+import io.github.suwasto.showcasecompose.render.ShowcaseStyle
+import io.github.suwasto.showcasecompose.tooltip.Tooltip
+import io.github.suwasto.showcasecompose.tooltip.TooltipDirection
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import showcase.composeapp.generated.resources.Res
@@ -76,7 +96,11 @@ import showcase.composeapp.generated.resources.urban_runner
 
 // Data classes for product and navigation
 data class Product(val id: Int, val name: String, val price: String, val imageRes: DrawableResource)
-data class BottomNavItem(val label: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector)
+data class BottomNavItem(
+    val label: String,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector
+)
 
 // Hardcoded data
 val products = listOf(
@@ -95,32 +119,101 @@ val bottomNavItems = listOf(
     BottomNavItem("Profile", Icons.Filled.Person, Icons.Outlined.Person),
 )
 
+enum class ShowcaseHighlight {
+    Search,
+    BAG
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
-    Scaffold(
-        topBar = {
-            Column {
-                CenterAlignedTopAppBar(
-                    title = { Text("FashionStore", fontWeight = FontWeight.SemiBold, color = Color.Black) },
-                    navigationIcon = { IconButton(onClick = {}) { Icon(Icons.Default.Menu, contentDescription = "Menu") } },
-                    actions = { IconButton(onClick = {}) { Icon(Icons.Default.Search, contentDescription = "Search") } },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+fun HomeScreen(
+    showcaseStyle: Showcase
+) {
+    val showcaseController = rememberShowcaseController()
+    val showcaseLayouts = remember { mutableStateMapOf<ShowcaseHighlight, Rect>() }
+    val showcaseSteps by remember {
+        derivedStateOf {
+            listOfNotNull(
+                showcaseLayouts[ShowcaseHighlight.Search]?.let { rect ->
+                    getSwocaseStepSearch(
+                        rect,
+                        showcaseStyle,
+                        showcaseController
+                    )
+                },
+                showcaseLayouts[ShowcaseHighlight.BAG]?.let { rect ->
+                    getSwocaseStepBag(
+                        rect,
+                        showcaseStyle,
+                        showcaseController
+                    )
+                }
+            )
+        }
+    }
+
+    LaunchedEffect(showcaseSteps) {
+        showcaseController.start(showcaseSteps)
+    }
+
+    ShowcaseHost(
+        controller = showcaseController
+    ) {
+        Scaffold(
+            topBar = {
+                Column {
+                    CenterAlignedTopAppBar(
+                        title = {
+                            Text(
+                                "FashionStore",
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.Black
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = {}) {
+                                Icon(
+                                    Icons.Default.Menu,
+                                    contentDescription = "Menu"
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(
+                                modifier = Modifier.captureBounds { rect ->
+                                    showcaseLayouts[ShowcaseHighlight.Search] = rect
+                                },
+                                onClick = {}
+                            ) {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = "Search"
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                    )
+                    HorizontalDivider(color = Color.LightGray, thickness = 1.dp)
+                }
+            },
+            bottomBar = {
+                BottomNavBar(
+                    onBagRectResolved = { rect ->
+                        showcaseLayouts[ShowcaseHighlight.BAG] = rect
+                    }
                 )
-                HorizontalDivider(color = Color.LightGray, thickness = 1.dp)
             }
-        },
-        bottomBar = { BottomNavBar() }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(Color(0xFFF9F9F9))
-        ) {
-            CategoryChipsRow()
-            ShowcaseBanner()
-            ProductGrid()
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(Color(0xFFF9F9F9))
+            ) {
+                CategoryChipsRow()
+                ShowcaseBanner()
+                ProductGrid()
+            }
         }
     }
 }
@@ -264,7 +357,9 @@ fun ProductCard(product: Product) {
 }
 
 @Composable
-fun BottomNavBar() {
+fun BottomNavBar(
+    onBagRectResolved: (Rect) -> Unit
+) {
     var selectedItem by remember { mutableStateOf("Home") }
     NavigationBar(
         containerColor = Color.White,
@@ -275,15 +370,19 @@ fun BottomNavBar() {
             val isCenterButton = item.label == "Bag"
 
             NavigationBarItem(
+                modifier = if (item.label == "Bag") Modifier.captureBounds {
+                    onBagRectResolved(it)
+                } else Modifier,
                 selected = isSelected,
                 onClick = { selectedItem = item.label },
                 icon = {
-                    Box(modifier = if (isCenterButton) Modifier
-                        .size(56.dp)
-                        .background(Color.Black, CircleShape)
-                        .padding(4.dp) else Modifier.size(24.dp)
+                    Box(
+                        modifier = if (isCenterButton) Modifier
+                            .size(56.dp)
+                            .background(Color.Black, CircleShape)
+                            .padding(4.dp) else Modifier.size(24.dp)
                     ) {
-                         Icon(
+                        Icon(
                             imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
                             contentDescription = item.label,
                             modifier = Modifier.align(Alignment.Center)
@@ -298,4 +397,79 @@ fun BottomNavBar() {
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+fun getSwocaseStepSearch(
+    rect: Rect,
+    showcase: Showcase,
+    showcaseController: ShowcaseController
+): ShowcaseStep {
+    return ShowcaseStep(
+        style = ShowcaseStyle.Standard(shape = ShowcaseShape.Circle),
+        rect = rect,
+        enableDimAnim = showcase != Showcase.STANDAR,
+        onClickHighlight = {},
+        content = { highlightRect ->
+            Tooltip(
+                modifier = Modifier.padding(end = 8.dp, start = 8.dp),
+                anchorRect = highlightRect,
+                direction = TooltipDirection.Bottom
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Text("Let's find what you need.", fontSize = 24.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Whenever you’re looking for something, this is your go-to spot. Try searching for \"Shoes\" or \"Jacket\" to see how it works.")
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row {
+                        Text("1/2")
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text("Next", fontWeight = FontWeight.Medium, modifier = Modifier.clickable {
+                            showcaseController.next()
+                        })
+                    }
+                }
+            }
+        },
+    )
+}
+
+fun getSwocaseStepBag(
+    rect: Rect,
+    showcase: Showcase,
+    showcaseController: ShowcaseController
+): ShowcaseStep {
+    return ShowcaseStep(
+        style = ShowcaseStyle.Standard(shape = ShowcaseShape.Circle),
+        rect = rect,
+        enableDimAnim = showcase != Showcase.STANDAR,
+        onClickHighlight = {
+            showcaseController.next()
+        },
+        content = { highlightRect ->
+            Tooltip(
+                modifier = Modifier.padding(end = 8.dp, start = 8.dp),
+                anchorRect = highlightRect,
+                direction = TooltipDirection.Top
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Text("Your personal stash.", fontSize = 24.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("All items you’ve added are waiting here. You can review or checkout whenever you’re ready.")
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row {
+                        Text("2/2")
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text("Got it!", fontWeight = FontWeight.Medium, modifier = Modifier.clickable {
+                            showcaseController.next()
+                        })
+                    }
+                }
+            }
+        },
+    )
 }
