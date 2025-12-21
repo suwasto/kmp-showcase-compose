@@ -85,6 +85,7 @@ import io.github.suwasto.showcasecompose.modifier.captureBounds
 import io.github.suwasto.showcasecompose.render.ShowcaseHost
 import io.github.suwasto.showcasecompose.render.ShowcaseStyle
 import io.github.suwasto.showcasecompose.tooltip.Tooltip
+import io.github.suwasto.showcasecompose.tooltip.TooltipBubbleStyle
 import io.github.suwasto.showcasecompose.tooltip.TooltipDirection
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -412,9 +413,12 @@ fun getSwocaseStepSearch(
         onClickHighlight = {},
         content = { highlightRect ->
             Tooltip(
-                modifier = Modifier.padding(end = 8.dp, start = 8.dp),
                 anchorRect = highlightRect,
-                direction = TooltipDirection.Bottom
+                direction = TooltipDirection.Bottom,
+                bubbleStyle = TooltipBubbleStyle(
+                    bubblePaddingStart = 8.dp,
+                    bubblePaddingEnd = 8.dp
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(12.dp)
@@ -426,9 +430,12 @@ fun getSwocaseStepSearch(
                     Row {
                         Text("1/2")
                         Spacer(modifier = Modifier.weight(1f))
-                        Text("Next", fontWeight = FontWeight.Medium, modifier = Modifier.clickable {
-                            showcaseController.next()
-                        })
+                        Text(
+                            "Next",
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.clickable {
+                                showcaseController.next()
+                            })
                     }
                 }
             }
@@ -450,9 +457,12 @@ fun getSwocaseStepBag(
         },
         content = { highlightRect ->
             Tooltip(
-                modifier = Modifier.padding(end = 8.dp, start = 8.dp),
                 anchorRect = highlightRect,
-                direction = TooltipDirection.Top
+                direction = TooltipDirection.Top,
+                bubbleStyle = TooltipBubbleStyle(
+                    bubblePaddingStart = 8.dp,
+                    bubblePaddingEnd = 8.dp
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(12.dp)
@@ -464,9 +474,12 @@ fun getSwocaseStepBag(
                     Row {
                         Text("2/2")
                         Spacer(modifier = Modifier.weight(1f))
-                        Text("Got it!", fontWeight = FontWeight.Medium, modifier = Modifier.clickable {
-                            showcaseController.next()
-                        })
+                        Text(
+                            "Got it!",
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.clickable {
+                                showcaseController.next()
+                            })
                     }
                 }
             }

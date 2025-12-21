@@ -27,7 +27,7 @@ import showcase.composeapp.generated.resources.compose_multiplatform
 
 @Composable
 fun LandingScreen(
-    onGetStartedClick: (Showcase) -> Unit
+    onGetStartedClick: (String) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize().background(Color.Gray)) {
         Column(
@@ -53,7 +53,7 @@ fun LandingScreen(
             )
             Spacer(Modifier.height(32.dp))
             Button(
-                onClick = { onGetStartedClick(Showcase.STANDAR) },
+                onClick = { onGetStartedClick(Showcase.STANDAR.name) },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White)
             ) {

@@ -22,11 +22,10 @@ import androidx.compose.ui.window.PopupProperties
 fun Tooltip(
     anchorRect: Rect,
     direction: TooltipDirection,
-    clippingEnable: Boolean = true,
     bubbleStyle: TooltipBubbleStyle = TooltipBubbleStyle(),
-    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+
     val density = LocalDensity.current
     val marginPx = with(density) { 8.dp.roundToPx() }
 
@@ -61,12 +60,12 @@ fun Tooltip(
         properties = PopupProperties(
             dismissOnBackPress = false,
             dismissOnClickOutside = false,
-            clippingEnabled = clippingEnable
+            clippingEnabled = true
         )
     ) {
 
         Box(
-            modifier = modifier.graphicsLayer {
+            modifier = Modifier.graphicsLayer {
                 scaleX = scale
                 scaleY = scale
                 this.alpha = alpha

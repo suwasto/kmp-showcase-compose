@@ -7,24 +7,40 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 
 @Composable
 internal fun TooltipBubble(
     direction: TooltipDirection,
     arrowCenter: Float,
     style: TooltipBubbleStyle = TooltipBubbleStyle(),
-    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
 
+    val density = LocalDensity.current
+
+    val padStartPx = with(density) { style.bubblePaddingStart.toPx() }
+    val padTopPx = with(density) { style.bubblePaddingTop.toPx() }
+
+    val adjustedArrowCenter = when (direction) {
+        TooltipDirection.Top, TooltipDirection.Bottom -> arrowCenter - padStartPx
+        TooltipDirection.Start, TooltipDirection.End -> arrowCenter - padTopPx
+    }.coerceAtLeast(0f)
+
     Box(
-        modifier = modifier
+        modifier = Modifier
+            .padding(
+                start = style.bubblePaddingStart,
+                end = style.bubblePaddingEnd,
+                top = style.bubblePaddingTop,
+                bottom = style.bubblePaddingBottom
+            )
             .clip(
                 TooltipBubbleShape(
                     direction = direction,
                     cornerRadius = style.cornerRadius,
                     arrowSize = style.arrowSize,
-                    arrowCenter = arrowCenter
+                    arrowCenter = adjustedArrowCenter
                 )
             )
             .background(style.backgroundColor)
