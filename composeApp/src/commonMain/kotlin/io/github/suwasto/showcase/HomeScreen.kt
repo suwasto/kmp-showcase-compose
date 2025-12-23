@@ -1,6 +1,8 @@
 package io.github.suwasto.showcase
 
-import androidx.compose.foundation.BasicTooltipBox
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
@@ -26,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -39,6 +41,7 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -49,15 +52,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.TooltipState
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -65,6 +62,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -87,6 +85,7 @@ import io.github.suwasto.showcasecompose.render.ShowcaseStyle
 import io.github.suwasto.showcasecompose.tooltip.Tooltip
 import io.github.suwasto.showcasecompose.tooltip.TooltipBubbleStyle
 import io.github.suwasto.showcasecompose.tooltip.TooltipDirection
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import showcase.composeapp.generated.resources.Res
@@ -406,10 +405,36 @@ fun getSwocaseStepSearch(
     showcase: Showcase,
     showcaseController: ShowcaseController
 ): ShowcaseStep {
+
+    var showcaseStyle: ShowcaseStyle
+    var dimColor: Color
+
+    when (showcase) {
+        Showcase.STANDAR, Showcase.ANIMATED -> {
+            dimColor = Color.Black.copy(alpha = 0.7f)
+            showcaseStyle = ShowcaseStyle.Standard(shape = ShowcaseShape.Circle)
+        }
+
+        Showcase.ANIMATED_HIGHLIGHT_WATERDROP -> {
+            dimColor = Color.Black.copy(alpha = 0.8f)
+            showcaseStyle = ShowcaseStyle.WaterDropRipple(
+                color = Color.Cyan
+            )
+        }
+
+        Showcase.ANIMATED_PULSING_CIRCLE -> {
+            dimColor = Color.Black.copy(alpha = 0.8f)
+            showcaseStyle = ShowcaseStyle.PulsingCircle(
+                color = Color.Cyan
+            )
+        }
+    }
+
     return ShowcaseStep(
-        style = ShowcaseStyle.Standard(shape = ShowcaseShape.Circle),
+        style = showcaseStyle,
         rect = rect,
         enableDimAnim = showcase != Showcase.STANDAR,
+        dimColor = dimColor,
         onClickHighlight = {},
         content = { highlightRect ->
             when (showcase) {
@@ -417,12 +442,8 @@ fun getSwocaseStepSearch(
                     ShowcaseStepSearchStandar(highlightRect, showcaseController)
                 }
 
-                Showcase.ANIMATED_HIGHLIGHT_RIPPLE -> {
-
-                }
-
-                Showcase.ANIMATED_HIGHLIGHT_WATERDROP -> {
-
+                Showcase.ANIMATED_PULSING_CIRCLE, Showcase.ANIMATED_HIGHLIGHT_WATERDROP -> {
+                    ShowcaseStepSearchAnimatedHighlight(showcaseController)
                 }
             }
         },
@@ -434,9 +455,35 @@ fun getSwocaseStepBag(
     showcase: Showcase,
     showcaseController: ShowcaseController
 ): ShowcaseStep {
+
+    var showcaseStyle: ShowcaseStyle
+    var dimColor: Color
+
+    when (showcase) {
+        Showcase.STANDAR, Showcase.ANIMATED -> {
+            dimColor = Color.Black.copy(alpha = 0.7f)
+            showcaseStyle = ShowcaseStyle.Standard(shape = ShowcaseShape.Circle)
+        }
+
+        Showcase.ANIMATED_HIGHLIGHT_WATERDROP -> {
+            dimColor = Color.Black.copy(alpha = 0.8f)
+            showcaseStyle = ShowcaseStyle.WaterDropRipple(
+                color = Color.Cyan
+            )
+        }
+
+        Showcase.ANIMATED_PULSING_CIRCLE -> {
+            dimColor = Color.Black.copy(alpha = 0.8f)
+            showcaseStyle = ShowcaseStyle.PulsingCircle(
+                color = Color.Cyan
+            )
+        }
+    }
+
     return ShowcaseStep(
-        style = ShowcaseStyle.Standard(shape = ShowcaseShape.Circle),
+        style = showcaseStyle,
         rect = rect,
+        dimColor = dimColor,
         enableDimAnim = showcase != Showcase.STANDAR,
         onClickHighlight = {
             showcaseController.next()
@@ -449,12 +496,8 @@ fun getSwocaseStepBag(
                     )
                 }
 
-                Showcase.ANIMATED_HIGHLIGHT_RIPPLE -> {
-
-                }
-
-                Showcase.ANIMATED_HIGHLIGHT_WATERDROP -> {
-
+                Showcase.ANIMATED_PULSING_CIRCLE, Showcase.ANIMATED_HIGHLIGHT_WATERDROP -> {
+                    ShowcaseStepBagAnimatedHighlight(showcaseController)
                 }
             }
         },
@@ -525,6 +568,94 @@ private fun ShowcaseStepBagStandar(
                     modifier = Modifier.clickable {
                         showcaseController.next()
                     })
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShowcaseStepSearchAnimatedHighlight(
+    showcaseController: ShowcaseController
+) {
+    var animateContentVisibility by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(600)
+        animateContentVisibility = true
+    }
+    AnimatedVisibility(
+        animateContentVisibility,
+        enter = fadeIn() + scaleIn(initialScale = 0.8f)
+    ) {
+        Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+            Card(
+                modifier = Modifier.align(Alignment.Center),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                ) {
+                    Text("Let's find what you need.", fontSize = 24.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Whenever you’re looking for something, this is your go-to spot. Try searching for \"Shoes\" or \"Jacket\" to see how it works.")
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row {
+                        Text("1/2")
+                        Spacer(modifier = Modifier.weight(1f))
+                        Button(
+                            modifier = Modifier.wrapContentWidth(),
+                            onClick = {
+                                showcaseController.next()
+                            }
+                        ) {
+                            Text(
+                                "Next"
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+private fun ShowcaseStepBagAnimatedHighlight(
+    showcaseController: ShowcaseController
+) {
+    var animateContentVisibility by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(600)
+        animateContentVisibility = true
+    }
+    AnimatedVisibility(
+        animateContentVisibility,
+        enter = fadeIn() + scaleIn(initialScale = 0.8f)
+    ) {
+        Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+            Card(
+                modifier = Modifier.align(Alignment.Center),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Your personal stash.", fontSize = 24.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("All items you’ve added are waiting here. You can review or checkout whenever you’re ready.")
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row {
+                        Text("2/2")
+                        Spacer(modifier = Modifier.weight(1f))
+                        Button(
+                            modifier = Modifier.wrapContentWidth(),
+                            onClick = {
+                                showcaseController.next()
+                            }
+                        ) {
+                            Text("Got it!")
+                        }
+                    }
+                }
             }
         }
     }

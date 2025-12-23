@@ -1,22 +1,11 @@
 package io.github.suwasto.showcase
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import androidx.savedstate.SavedState
-import androidx.savedstate.read
-import androidx.savedstate.write
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.Json.Default.encodeToString
-import kotlin.coroutines.EmptyCoroutineContext.get
 
 @Serializable
 data object Landing
@@ -28,7 +17,7 @@ enum class Showcase {
     STANDAR,
     ANIMATED,
     ANIMATED_HIGHLIGHT_WATERDROP,
-    ANIMATED_HIGHLIGHT_RIPPLE
+    ANIMATED_PULSING_CIRCLE
 }
 
 @Composable

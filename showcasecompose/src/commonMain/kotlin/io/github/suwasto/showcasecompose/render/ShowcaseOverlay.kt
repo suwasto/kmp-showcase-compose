@@ -1,22 +1,26 @@
 package io.github.suwasto.showcasecompose.render
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -27,7 +31,6 @@ import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -60,8 +63,7 @@ sealed interface ShowcaseStyle {
 
 @Composable
 internal fun ShowcaseOverlay(
-    state: ShowcaseState,
-    dimColor: Color = Color.Black.copy(alpha = 0.7f)
+    state: ShowcaseState
 ) {
     if (!state.isActive) return
 
@@ -77,11 +79,14 @@ internal fun ShowcaseOverlay(
 
     val animatable = remember { Animatable(0f) }
 
-    LaunchedEffect(step.enableDimAnim) {
+    LaunchedEffect(step.enableDimAnim, state.currentIndex) {
         if (step.enableDimAnim) {
             animatable.snapTo(0f)
             delay(16)
-            animatable.animateTo(1f, tween(step.dimAnimationDurationMillis, easing = FastOutSlowInEasing))
+            animatable.animateTo(
+                1f,
+                tween(step.dimAnimationDurationMillis, easing = FastOutSlowInEasing)
+            )
         } else {
             animatable.snapTo(1f)
         }
@@ -166,13 +171,13 @@ internal fun ShowcaseOverlay(
                             center = center,
                             radius = maxRadius,
                             paint = Paint().apply {
-                                color = dimColor
+                                color = step.dimColor
                                 style = PaintingStyle.Fill
                             }
                         )
                     } else {
                         drawRect(
-                            color = dimColor,
+                            color = step.dimColor,
                             size = size
                         )
                     }
@@ -229,9 +234,7 @@ internal fun ShowcaseOverlay(
                 }
             }
     ) {}
-    Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
-        step.content(rect)
-    }
+    step.content(rect)
 }
 
 private fun drawCutout(
