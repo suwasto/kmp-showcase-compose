@@ -3,11 +3,14 @@ package io.github.suwasto.showcasecompose.tooltip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.PopupPositionProvider
+import io.github.suwasto.showcasecompose.internal.Platform
+import io.github.suwasto.showcasecompose.internal.getCurrentPlatform
 
 class ReportingTooltipPositionProvider(
     private val anchor: Rect,
     private val direction: TooltipDirection,
     private val marginPx: Int,
+    private val statusBarHeightPx: Int = 0,
     private val onArrowCenterResolved: (Float) -> Unit,
     private val onPositionResolved: () -> Unit = {}
 ) : PopupPositionProvider {
@@ -51,7 +54,12 @@ class ReportingTooltipPositionProvider(
 
         // Clamp bubble inside the window if needed
         val clampedX = offset.x.coerceIn(0, windowSize.width - popupContentSize.width)
-        val clampedY = offset.y.coerceIn(0, windowSize.height - popupContentSize.height)
+        var clampedY = offset.y.coerceIn(0, windowSize.height - popupContentSize.height)
+
+        if (getCurrentPlatform() == Platform.IOS) {
+            clampedY -= statusBarHeightPx
+        }
+
         val finalOffset = IntOffset(clampedX, clampedY)
 
         // Compute arrow center relative to bubble

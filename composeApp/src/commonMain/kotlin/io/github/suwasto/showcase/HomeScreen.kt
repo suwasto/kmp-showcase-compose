@@ -412,31 +412,17 @@ fun getSwocaseStepSearch(
         enableDimAnim = showcase != Showcase.STANDAR,
         onClickHighlight = {},
         content = { highlightRect ->
-            Tooltip(
-                anchorRect = highlightRect,
-                direction = TooltipDirection.Bottom,
-                bubbleStyle = TooltipBubbleStyle(
-                    bubblePaddingStart = 8.dp,
-                    bubblePaddingEnd = 8.dp
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(12.dp)
-                ) {
-                    Text("Let's find what you need.", fontSize = 24.sp)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Whenever you’re looking for something, this is your go-to spot. Try searching for \"Shoes\" or \"Jacket\" to see how it works.")
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row {
-                        Text("1/2")
-                        Spacer(modifier = Modifier.weight(1f))
-                        Text(
-                            "Next",
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.clickable {
-                                showcaseController.next()
-                            })
-                    }
+            when (showcase) {
+                Showcase.STANDAR, Showcase.ANIMATED -> {
+                    ShowcaseStepSearchStandar(highlightRect, showcaseController)
+                }
+
+                Showcase.ANIMATED_HIGHLIGHT_RIPPLE -> {
+
+                }
+
+                Showcase.ANIMATED_HIGHLIGHT_WATERDROP -> {
+
                 }
             }
         },
@@ -456,33 +442,90 @@ fun getSwocaseStepBag(
             showcaseController.next()
         },
         content = { highlightRect ->
-            Tooltip(
-                anchorRect = highlightRect,
-                direction = TooltipDirection.Top,
-                bubbleStyle = TooltipBubbleStyle(
-                    bubblePaddingStart = 8.dp,
-                    bubblePaddingEnd = 8.dp
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(12.dp)
-                ) {
-                    Text("Your personal stash.", fontSize = 24.sp)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("All items you’ve added are waiting here. You can review or checkout whenever you’re ready.")
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row {
-                        Text("2/2")
-                        Spacer(modifier = Modifier.weight(1f))
-                        Text(
-                            "Got it!",
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.clickable {
-                                showcaseController.next()
-                            })
-                    }
+            when (showcase) {
+                Showcase.STANDAR, Showcase.ANIMATED -> {
+                    ShowcaseStepBagStandar(
+                        highlightRect, showcaseController
+                    )
+                }
+
+                Showcase.ANIMATED_HIGHLIGHT_RIPPLE -> {
+
+                }
+
+                Showcase.ANIMATED_HIGHLIGHT_WATERDROP -> {
+
                 }
             }
         },
     )
+}
+
+
+@Composable
+private fun ShowcaseStepSearchStandar(
+    highlightRect: Rect,
+    showcaseController: ShowcaseController
+) {
+    Tooltip(
+        anchorRect = highlightRect,
+        direction = TooltipDirection.Bottom,
+        bubbleStyle = TooltipBubbleStyle(
+            bubblePaddingStart = 8.dp,
+            bubblePaddingEnd = 8.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Text("Let's find what you need.", fontSize = 24.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Whenever you’re looking for something, this is your go-to spot. Try searching for \"Shoes\" or \"Jacket\" to see how it works.")
+            Spacer(modifier = Modifier.height(24.dp))
+            Row {
+                Text("1/2")
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    "Next",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable {
+                        showcaseController.next()
+                    })
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShowcaseStepBagStandar(
+    highlightRect: Rect,
+    showcaseController: ShowcaseController
+) {
+    Tooltip(
+        anchorRect = highlightRect,
+        direction = TooltipDirection.Top,
+        bubbleStyle = TooltipBubbleStyle(
+            bubblePaddingStart = 8.dp,
+            bubblePaddingEnd = 8.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Text("Your personal stash.", fontSize = 24.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("All items you’ve added are waiting here. You can review or checkout whenever you’re ready.")
+            Spacer(modifier = Modifier.height(24.dp))
+            Row {
+                Text("2/2")
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    "Got it!",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable {
+                        showcaseController.next()
+                    })
+            }
+        }
+    }
 }

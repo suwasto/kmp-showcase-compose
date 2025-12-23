@@ -32,32 +32,23 @@ fun LandingScreen(
     Box(modifier = Modifier.fillMaxSize().background(Color.Gray)) {
         Column(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
+                .align(Alignment.Center)
                 .padding(32.dp)
         ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = "Welcome to FashionStore",
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = "Discover the latest trends and styles.",
-                color = Color.White.copy(alpha = 0.8f),
-                fontSize = 16.sp,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(32.dp))
             Button(
                 onClick = { onGetStartedClick(Showcase.STANDAR.name) },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White)
             ) {
-                Text("Get Started", color = Color.Black, fontWeight = FontWeight.Bold)
+                Text("STANDAR WITH TOOLTIP", color = Color.Black, fontWeight = FontWeight.Bold)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { onGetStartedClick(Showcase.ANIMATED.name) },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+            ) {
+                Text("ANIMATED WITH TOOLTIP", color = Color.Black, fontWeight = FontWeight.Bold)
             }
         }
     }

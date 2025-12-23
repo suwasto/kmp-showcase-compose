@@ -5,6 +5,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +30,7 @@ fun Tooltip(
 
     val density = LocalDensity.current
     val marginPx = with(density) { 8.dp.roundToPx() }
+    val statusBarHeightPx = WindowInsets.statusBars.getTop(density)
 
     var positionReady by remember { mutableStateOf(false) }
     var arrowCenter by remember { mutableStateOf(0f) }
@@ -52,6 +55,7 @@ fun Tooltip(
             anchor = anchorRect,
             direction = direction,
             marginPx = marginPx,
+            statusBarHeightPx = statusBarHeightPx,
             onArrowCenterResolved = { arrowCenter = it },
             onPositionResolved = {
                 positionReady = true
