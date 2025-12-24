@@ -207,7 +207,7 @@ fun MyScreenWithShowcase() {
 }
 ```
 
-For a complete example, check out the [composeApp](composeApp) directory in the repository, which contains the usage of UI components and utilities for showcase onboarding.
+For a complete example, check out the [composeApp](composeApp/src/commonMain/kotlin/io/github/suwasto/showcase) directory in the repository, which contains the usage of UI components and utilities for showcase onboarding.
 
 ### `ShowcaseStep` Parameters
 
