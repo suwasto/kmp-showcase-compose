@@ -1,8 +1,9 @@
 # kmp-showcase-compose
 
-![Showcase-Compose](assets/sample.gif)
-
 A Kotlin Multiplatform library for creating onboarding showcases, UI highlights, and guided walkthroughs in Compose. Use it to spotlight key UI components, guide users step-by-step, and deliver polished intro experiences on both Android and iOS with simple, declarative APIs.
+
+## Demo
+![Showcase-Compose](assets/sample.gif)
 
 ## Usage
 
@@ -206,6 +207,8 @@ fun MyScreenWithShowcase() {
 }
 ```
 
+For a complete example, check out the [composeApp](composeApp) directory in the repository, which contains the usage of UI components and utilities for showcase onboarding.
+
 ### `ShowcaseStep` Parameters
 
 | Parameter | Description |
@@ -227,3 +230,21 @@ fun MyScreenWithShowcase() {
 | `direction` | The direction in which the tooltip should be displayed relative to the anchor. See `TooltipDirection`. |
 | `bubbleStyle` | The style of the tooltip bubble. See `TooltipBubbleStyle`. |
 | `content` | The content to display inside the tooltip. |
+
+### 📄 License
+
+```
+Copyright 2025 Anang Suwasto
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
