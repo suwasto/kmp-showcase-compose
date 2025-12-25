@@ -1,9 +1,12 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.vanniktech.maven.publish.SonatypeHost
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
 kotlin {
@@ -104,4 +107,44 @@ kotlin {
         }
     }
 
+}
+
+mavenPublishing {
+
+    coordinates(
+        groupId = "io.github.suwasto",
+        artifactId = "kmp-showcase-compose",
+        version = "0.1.0"
+    )
+
+    pom {
+        name.set("Kotlin Multiplatform Screenshot Library for Onboarding Showcases")
+        description.set("A Kotlin Multiplatform library for creating onboarding showcases, UI highlights, and guided walkthroughs in Compose. Use it to spotlight key UI components, guide users step-by-step, and deliver polished intro experiences on both Android and iOS with simple, declarative APIs.")
+        url.set("https://github.com/suwasto/kmp-showcase-compose")
+
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+
+        developers {
+            developer {
+                id.set("suwasto")
+                name.set("Anang Suwasto")
+                email.set("suwasto.anang@gmail.com")
+            }
+        }
+
+        scm {
+            connection.set("scm:git:git://github.com/suwasto/kmp-showcase-compose.git")
+            developerConnection.set("scm:git:ssh://github.com/suwasto/kmp-showcase-compose.git")
+            url.set("https://github.com/suwasto/kmp-showcase-compose")
+        }
+    }
+
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+
+    signAllPublications()
 }
