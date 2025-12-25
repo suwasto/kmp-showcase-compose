@@ -1,12 +1,10 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import com.vanniktech.maven.publish.SonatypeHost
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    id("com.vanniktech.maven.publish") version "0.30.0"
+    id("com.vanniktech.maven.publish") version "0.35.0"
 }
 
 kotlin {
@@ -144,7 +142,7 @@ mavenPublishing {
         }
     }
 
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
 
     signAllPublications()
 }

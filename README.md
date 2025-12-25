@@ -1,4 +1,4 @@
-# kmp-showcase-compose
+# Kotlin Multiplatform Library for Onboarding Showcases
 
 A Kotlin Multiplatform library for creating onboarding showcases, UI highlights, and guided walkthroughs in Compose. Use it to spotlight key UI components, guide users step-by-step, and deliver polished intro experiences on both Android and iOS with simple, declarative APIs.
 
@@ -7,9 +7,14 @@ A Kotlin Multiplatform library for creating onboarding showcases, UI highlights,
 
 ## Usage
 
-For a more detailed and real-world example, check out the `composeApp` module in this project.
+To get started, add the dependency to your `build.gradle.kts` file:
 
-Here’s a step-by-step guide to implementing a showcase in your app, based on a real-world example.
+```kotlin
+// in your commonMain dependencies
+implementation("io.github.suwasto:kmp-showcase-compose:0.1.0")
+```
+
+For a complete example, check out the [composeApp](composeApp/src/commonMain/kotlin/io/github/suwasto/showcase) directory in the repository, which contains the usage of UI components and utilities for showcase onboarding.
 
 ### Step 1: Set up `ShowcaseHost` and Controller
 
@@ -206,8 +211,6 @@ fun MyScreenWithShowcase() {
     }
 }
 ```
-
-For a complete example, check out the [composeApp](composeApp/src/commonMain/kotlin/io/github/suwasto/showcase) directory in the repository, which contains the usage of UI components and utilities for showcase onboarding.
 
 ### `ShowcaseStep` Parameters
 
