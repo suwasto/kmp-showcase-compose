@@ -2,6 +2,13 @@
 
 A Kotlin Multiplatform library for creating onboarding showcases, UI highlights, and guided walkthroughs in Compose. Use it to spotlight key UI components, guide users step-by-step, and deliver polished intro experiences on both Android and iOS with simple, declarative APIs.
 
+# Key Features:
+- Multiplatform Support: Write your showcase logic once in commonMain and run it on both Android and iOS.
+- Declarative API: Define showcase steps with simple composables. Use the .captureBounds() modifier to easily target any UI element.•Customizable Highlights: Control the look of your highlighted area with customizable shapes (rounded rectangle, circle) and styles.
+- Flexible Content: Display any composable content for each step—not just a simple tooltip. Use Column, Button, or any other composable to create rich, interactive guides.
+- Intelligent Tooltip Positioning: The built-in Tooltip automatically repositions itself to avoid screen edges, ensuring your content is always visible.
+- Showcase Controller: A simple ShowcaseController to easily start and manage the sequence of your showcase steps.
+
 ## Demo
 ![Showcase-Compose](assets/sample.gif)
 
