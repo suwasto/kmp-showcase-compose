@@ -149,7 +149,7 @@ fun MyScreenWithShowcase() {
     // 3. Use a LaunchedEffect to start the showcase.
     // rememberSaveable is used to ensure the showcase runs only once.
     var shouldShowShowcase by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(shouldShowShowcase) {
+    LaunchedEffect(showcaseSteps, shouldShowShowcase) {
         if (shouldShowShowcase) {
             showcaseController.start(showcaseSteps)
         }
