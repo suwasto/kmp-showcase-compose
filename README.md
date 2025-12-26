@@ -10,15 +10,21 @@ A Kotlin Multiplatform library for creating onboarding showcases, UI highlights,
 - Showcase Controller: A simple ShowcaseController to easily start and manage the sequence of your showcase steps.
 
 ## Demo
-![Showcase-Compose](assets/sample.gif)
+![Showcase-Compose](assets/sample.png)
 
-## Usage
+## Installation
 
-To get started, add the dependency to your `build.gradle.kts` file:
+First, add the dependency to your commonMain source set in your build.gradle.kts file:
 
 ```kotlin
 // in your commonMain dependencies
-implementation("io.github.suwasto:kmp-showcase-compose:0.1.0")
+sourceSets {
+    val commonMain by getting {
+        dependencies {
+            implementation("io.github.suwasto:kmp-showcase-compose:0.1.0") // Use latest version
+        }
+    }
+}
 ```
 
 For a complete example, check out the [composeApp](composeApp/src/commonMain/kotlin/io/github/suwasto/showcase) directory in the repository, which contains the usage of UI components and utilities for showcase onboarding.
@@ -69,34 +75,19 @@ Once you have the bounds, you can define the steps for your showcase. A `Showcas
 Define the steps inside your main composable so you can access the `showcaseController` if needed (e.g., for a "Next" button).
 
 ```kotlin
-val showcaseSteps by remember(showcaseController) {
+val showcaseSteps by remember {
     derivedStateOf {
         listOfNotNull(
             showcaseLayouts[ShowcaseHighlight.Search]?.let { rect ->
                 ShowcaseStep(
-                    rect = rect,
-                    content = { highlightRect ->
-                        Tooltip(
-                            anchorRect = highlightRect, 
-                            direction = TooltipDirection.Bottom
-                        ) {
-                            Text("Use this to search for products.")
-                        }
-                    }
+                    targetRect = rect,
+                    content = { SearchTooltip(showcaseController) }
                 )
             },
-            showcaseLayouts[ShowcaseHighlight.Bag]?.let { rect ->
-                 ShowcaseStep(
-                    rect = rect,
-                    style = ShowcaseStyle.Standard(shape = ShowcaseShape.Circle),
-                    content = { _ ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Check your shopping bag here.")
-                            Button(onClick = { showcaseController.next() }) {
-                                Text("Next Step")
-                            }
-                        }
-                    }
+            showcaseLayouts[ShowcaseHighlight.BAG]?.let { rect ->
+                ShowcaseStep(
+                    targetRect = rect,
+                    content = { BagTooltip(showcaseController) }
                 )
             }
         )
@@ -109,8 +100,9 @@ val showcaseSteps by remember(showcaseController) {
 Finally, use a `LaunchedEffect` to start the showcase once the steps are defined. To ensure the showcase runs only once, you can use a `rememberSaveable` flag.
 
 ```kotlin
-LaunchedEffect(YourKey) {
-    if (YourCondition) {
+// Start the sequence when steps are ready and on your condition
+LaunchedEffect(showcaseSteps, shouldShowOnboardingShowcases) {
+    if (shouldShowOnboardingShowcases) {
         showcaseController.start(showcaseSteps)
     }
 }
@@ -135,34 +127,19 @@ fun MyScreenWithShowcase() {
 
     // 2. Define the showcase steps.
     // This is a derived state, so it will automatically update when showcaseLayouts changes.
-    val showcaseSteps by remember(showcaseController) {
+    val showcaseSteps by remember {
         derivedStateOf {
             listOfNotNull(
                 showcaseLayouts[ShowcaseHighlight.Search]?.let { rect ->
                     ShowcaseStep(
-                        rect = rect,
-                        content = { highlightRect ->
-                            Tooltip(
-                                anchorRect = highlightRect,
-                                direction = TooltipDirection.Bottom
-                            ) {
-                                Text("Use this to search for products.")
-                            }
-                        }
+                        targetRect = rect,
+                        content = { SearchTooltip(showcaseController) }
                     )
                 },
-                showcaseLayouts[ShowcaseHighlight.Bag]?.let { rect ->
+                showcaseLayouts[ShowcaseHighlight.BAG]?.let { rect ->
                     ShowcaseStep(
-                        rect = rect,
-                        style = ShowcaseStyle.Standard(shape = ShowcaseShape.Circle),
-                        content = { _ ->
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("Check your shopping bag here.")
-                                Button(onClick = { showcaseController.next() }) {
-                                    Text("Next Step")
-                                }
-                            }
-                        }
+                        targetRect = rect,
+                        content = { BagTooltip(showcaseController) }
                     )
                 }
             )
@@ -218,6 +195,173 @@ fun MyScreenWithShowcase() {
     }
 }
 ```
+
+### Customizing the Tooltip
+Inside the content block of a ShowcaseStep, you can design any Compose UI. You have access to the controller to move to the next step or dismiss the tour.
+
+#### Standar Onboarding Showcase Sample
+```kotlin
+fun getSwocaseStepSearch(
+    rect: Rect,
+    showcaseController: ShowcaseController
+): ShowcaseStep {
+
+    var showcaseStyle: ShowcaseStyle = ShowcaseStyle.Standard(shape = ShowcaseShape.Circle)
+    var dimColor: Color = Color.Black.copy(alpha = 0.7f)
+
+    return ShowcaseStep(
+        style = showcaseStyle,
+        rect = rect,
+        dimColor = dimColor,
+        onClickHighlight = {},
+        content = { highlightRect ->
+            Tooltip(
+                anchorRect = highlightRect,
+                direction = TooltipDirection.Bottom,
+                bubbleStyle = TooltipBubbleStyle(
+                    bubblePaddingStart = 8.dp,
+                    bubblePaddingEnd = 8.dp
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Text("Let's find what you need.", fontSize = 24.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Whenever you’re looking for something, this is your go-to spot. Try searching for \"Shoes\" or \"Jacket\" to see how it works.")
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row {
+                        Text("1/2")
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            "Next",
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.clickable {
+                                showcaseController.next()
+                            }
+                        )
+                    }
+                }
+            }
+        },
+    )
+}
+```
+![ios_1.gif](assets/ios_1.gif)
+
+#### Animated Overlay Showcase Onboarding Sample
+
+```kotlin
+fun getSwocaseStepSearch(
+    rect: Rect,
+    showcaseController: ShowcaseController
+): ShowcaseStep {
+
+    var showcaseStyle: ShowcaseStyle = ShowcaseStyle.Standard(shape = ShowcaseShape.Circle)
+    var dimColor: Color = Color.Black.copy(alpha = 0.7f)
+
+    return ShowcaseStep(
+        style = showcaseStyle,
+        rect = rect,
+        enableDimAnim = true, // dim anim enabled
+        dimColor = dimColor,
+        onClickHighlight = {},
+        content = { highlightRect ->
+            // same content with previous sample
+        },
+    )
+}
+```
+![ios_2.gif](assets/ios_2.gif)
+
+#### Water Ripple Cutout Animation
+
+```kotlin
+fun getSwocaseStepSearch(
+    rect: Rect,
+    showcaseController: ShowcaseController
+): ShowcaseStep {
+    // showcasestyle waterdrop ripple
+    var showcaseStyle: ShowcaseStyle = ShowcaseStyle.WaterDropRipple(color = Color.Cyan)
+    var dimColor: Color = Color.Black.copy(alpha = 0.7f)
+
+    return ShowcaseStep(
+        style = showcaseStyle,
+        rect = rect,
+        enableDimAnim = true, // dim anim enabled
+        dimColor = dimColor,
+        onClickHighlight = {},
+        content = { highlightRect ->
+              var animateContentVisibility by rememberSaveable { mutableStateOf(false) }
+              LaunchedEffect(Unit) {
+                  delay(600)
+                  animateContentVisibility = true
+              }
+              AnimatedVisibility(
+                  animateContentVisibility,
+                  enter = fadeIn() + scaleIn(initialScale = 0.8f)
+              ) {
+                  Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+                      Card(
+                          modifier = Modifier.align(Alignment.Center),
+                          colors = CardDefaults.cardColors(containerColor = Color.White)
+                      ) {
+                          Column(
+                              modifier = Modifier
+                                  .padding(16.dp)
+                          ) {
+                              Text("Let's find what you need.", fontSize = 24.sp)
+                              Spacer(modifier = Modifier.height(16.dp))
+                              Text("Whenever you’re looking for something, this is your go-to spot. Try searching for \"Shoes\" or \"Jacket\" to see how it works.")
+                              Spacer(modifier = Modifier.height(24.dp))
+                              Row {
+                                  Text("1/2")
+                                  Spacer(modifier = Modifier.weight(1f))
+                                  Button(
+                                      modifier = Modifier.wrapContentWidth(),
+                                      onClick = {
+                                          showcaseController.next()
+                                      }
+                                  ) {
+                                      Text(
+                                          "Next"
+                                      )
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+        },
+    )
+}
+```
+![ios_3.gif](assets/ios_3.gif)
+
+#### Pulsing Circle Cutout Animation
+
+```kotlin
+fun getSwocaseStepSearch(
+    rect: Rect,
+    showcaseController: ShowcaseController
+): ShowcaseStep {
+    // showcasestyle pulsing circle
+    var showcaseStyle: ShowcaseStyle = ShowcaseStyle.PulsingCircle(color = Color.Cyan)
+    var dimColor: Color = Color.Black.copy(alpha = 0.7f)
+
+    return ShowcaseStep(
+        style = showcaseStyle,
+        rect = rect,
+        enableDimAnim = true, // dim anim enabled
+        dimColor = dimColor,
+        onClickHighlight = {},
+        content = { highlightRect ->
+            // same content with previous sample
+        },
+    )
+}
+```
+![ios_4.gif](assets/ios_4.gif)
 
 ### `ShowcaseStep` Parameters
 
